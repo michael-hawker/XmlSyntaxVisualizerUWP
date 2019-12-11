@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:monaco="using:Monaco"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -17,6 +18,21 @@
 
         <monaco:CodeEditor x:Name="XmlEditor"/>
 
-        <TreeView x:Name="XmlSyntaxTree" Grid.Column="1"/>
+        <muxc:TreeView x:Name="XmlSyntaxTree" Grid.Column="1"
+                  ItemsSource="{x:Bind RootNodes, Mode=OneWay}">
+            <muxc:TreeView.ItemTemplate>
+                <DataTemplate x:DataType="local:XmlSyntaxData">
+                    <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
+                                       IsExpanded="True">
+                        <TextBlock>
+                            <Run FontWeight="Bold" Text="{x:Bind Type}"/>
+                            <Run Text="{x:Bind Text}"/>
+                            <Run>[</Run><Run Text="{x:Bind SpanStart}"/>
+                            <Run>..</Run><Run Text="{x:Bind SpanEnd}"/><Run>)</Run>
+                        </TextBlock>
+                    </muxc:TreeViewItem>
+                </DataTemplate>
+            </muxc:TreeView.ItemTemplate>
+        </muxc:TreeView>
     </Grid>
 </Page>
