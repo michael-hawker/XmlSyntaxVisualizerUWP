@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<X xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:template></xsl:template>
+  <X/>
+  <A.B></A.B>
+  <A B="value"></A>
+  <A>&#x03C0;</A>
+  <A>a &lt;</A>
+  <A><![CDATA[bar]]></A>
+  <!-- comment -->
+</X>

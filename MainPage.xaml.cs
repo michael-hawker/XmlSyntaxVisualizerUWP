@@ -25,6 +25,13 @@ namespace XmlSyntaxVisualizerUwp
         public MainPage()
         {
             this.InitializeComponent();
+
+            // Load example file
+            using (var stream = GetType().Assembly.GetManifestResourceStream("XmlSyntaxVisualizerUwp.ExampleDocument.xml"))
+            using (var reader = new StreamReader(stream))
+            {
+                XmlEditor.Text = reader.ReadToEnd();
+            }
         }
     }
 }
