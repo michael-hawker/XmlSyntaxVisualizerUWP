@@ -16,14 +16,16 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <monaco:CodeEditor x:Name="XmlEditor"/>
+        <monaco:CodeEditor x:Name="XmlEditor"
+                           Loading="XmlEditor_Loading"/>
 
         <muxc:TreeView x:Name="XmlSyntaxTree" Grid.Column="1"
                   ItemsSource="{x:Bind RootNodes, Mode=OneWay}">
             <muxc:TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:XmlSyntaxData">
                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
-                                       IsExpanded="True">
+                                       IsExpanded="True"
+                                       PointerMoved="TreeViewItem_PointerMoved">
                         <TextBlock>
                             <Run FontWeight="Bold" Text="{x:Bind Type}"/>
                             <Run Text="{x:Bind Text}"/>

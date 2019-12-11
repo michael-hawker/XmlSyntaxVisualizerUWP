@@ -1,14 +1,19 @@
 ﻿using Microsoft.Language.Xml;
 using Monaco;
+using Monaco.Editor;
 using Monaco.Helpers;
+using Monaco.Languages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
+using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -36,6 +41,8 @@ namespace XmlSyntaxVisualizerUwp
         public static readonly DependencyProperty RootNodesProperty =
             DependencyProperty.Register(nameof(RootNodes), typeof(List<XmlSyntaxData>), typeof(MainPage), new PropertyMetadata(new List<XmlSyntaxData>()));
 
+        private SyntaxNode _lastRoot;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -52,10 +59,76 @@ namespace XmlSyntaxVisualizerUwp
 
         private void XmlEditor_TextChanged(DependencyObject sender, DependencyProperty dp)
         {
-            var document = Parser.ParseText(XmlEditor.Text);
+            XmlEditor.Decorations.Clear();
+
+            _lastRoot = Parser.ParseText(XmlEditor.Text);
+
             var list = new List<XmlSyntaxData>();
-            list.Add(XmlSyntaxData.FromNode(document));
+            list.Add(XmlSyntaxData.FromNode(_lastRoot));
             RootNodes = list;
+        }
+
+        private async void XmlEditor_Loading(object sender, RoutedEventArgs e)
+        {
+            var languages = new Monaco.LanguagesHelper(XmlEditor);
+
+            await languages.RegisterHoverProviderAsync("xml", (model, position) =>
+            {
+                return AsyncInfo.Run(async delegate (CancellationToken cancelationToken)
+                {
+                    var index = XmlEditor.Text.GetCharacterIndex((int)position.LineNumber, (int)position.Column);
+
+                    if (index == -1)
+                    {
+                        return default;
+                    }
+
+                    var node = XmlSyntaxData.FromNode(_lastRoot.FindNode(index + 1), false);
+
+                    if (node != null)
+                    {
+                        // Refetch proper line/col from start of token
+                        var (line_s, col_s) = XmlEditor.Text.GetLineColumnIndex(node.SpanStart);
+                        var (line_e, col_e) = XmlEditor.Text.GetLineColumnIndex(node.SpanEnd - 1);
+
+                        return new Hover(new string[]
+                            {
+                                "*" + node.Type + "* " + node.Text + " [" + node.SpanStart + ".." + node.SpanEnd + ")",
+                                "Line: " + line_s + " Col: " + col_s + " Length: " + node.Length
+                            }, 
+                            new Range((uint)line_s, (uint)col_s, (uint)line_e, (uint)col_e + 1));
+                    }
+
+                    return default;
+                });
+            });
+        }
+
+        private XmlSyntaxData _lastData;
+
+        private void TreeViewItem_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Microsoft.UI.Xaml.Controls.TreeViewItem item &&
+                item.DataContext is XmlSyntaxData data &&
+                data != _lastData)
+            {
+                _lastData = data; // Cache so we only update on initial mouse change
+
+                var (line_s, col_s) = XmlEditor.Text.GetLineColumnIndex(data.SpanStart);
+                var (line_e, col_e) = XmlEditor.Text.GetLineColumnIndex(data.SpanEnd - 1);
+
+                XmlEditor.Decorations.Clear();
+
+                XmlEditor.Decorations.Add(
+                    new IModelDeltaDecoration(new Range((uint)line_s, (uint)col_s, (uint)line_e, (uint)(col_e + 1)), new IModelDecorationOptions()
+                {
+                    ClassName = new CssLineStyle() // TODO: Save these styles so we don't keep regenerating them and adding new ones.
+                    {
+                        BackgroundColor = new SolidColorBrush(Colors.Yellow),
+                    },
+                    Stickiness = TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges
+                }));
+            }
         }
     }
 
@@ -68,9 +141,11 @@ namespace XmlSyntaxVisualizerUwp
         public int SpanStart { get; set; }
         public int SpanEnd { get; set; }
 
+        public int Length => SpanEnd - SpanStart;
+
         public List<XmlSyntaxData> Children { get; set; }
 
-        public static XmlSyntaxData FromNode(SyntaxNode node)
+        public static XmlSyntaxData FromNode(SyntaxNode node, bool withChildren = true)
         {
             return new XmlSyntaxData()
             {
@@ -86,7 +161,7 @@ namespace XmlSyntaxVisualizerUwp
                     : Array.Empty<XmlSyntaxError>().ToList(),
                 SpanStart = node.FullSpan.Start,
                 SpanEnd = node.FullSpan.End,
-                Children = node.ChildNodes.Select(child => XmlSyntaxData.FromNode(child)).ToList()
+                Children = withChildren ? node.ChildNodes.Select(child => XmlSyntaxData.FromNode(child)).ToList() : Array.Empty<XmlSyntaxData>().ToList()
             };
         }
     }
