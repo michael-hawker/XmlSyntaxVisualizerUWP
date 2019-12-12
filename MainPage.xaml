@@ -26,13 +26,30 @@
                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                        IsExpanded="True"
                                        PointerMoved="TreeViewItem_PointerMoved">
-                        <TextBlock>
-                            <Run FontWeight="Bold" Text="{x:Bind Type}"
-                                 Foreground="{x:Bind local:MainPage.ColorSelector(TypeClass)}"/>
-                            <Run Text="{x:Bind Text}"/>
-                            <Run>[</Run><Run Text="{x:Bind SpanStart}"/>
-                            <Run>..</Run><Run Text="{x:Bind SpanEnd}"/><Run>)</Run>
-                        </TextBlock>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🛑" Foreground="Red"
+                                       Margin="0,0,4,0"
+                                       Visibility="{x:Bind IsError}"/>
+                            <TextBlock Grid.Column="2">
+                                <Run FontWeight="Bold" Text="{x:Bind Type}"
+                                     Foreground="{x:Bind local:MainPage.ColorSelector(TypeClass)}"/>
+                                <Run Text="{x:Bind Text}"/>
+                                <Run>[</Run><Run Text="{x:Bind SpanStart}"/>
+                                <Run>..</Run><Run Text="{x:Bind SpanEnd}"/><Run>)</Run>
+                            </TextBlock>
+                            <TextBlock Text="{x:Bind ErrorText}"
+                                       Visibility="{x:Bind IsError}"
+                                       Grid.Row="2" Grid.ColumnSpan="2"
+                                       Foreground="Red"/>
+                        </Grid>
                     </muxc:TreeViewItem>
                 </DataTemplate>
             </muxc:TreeView.ItemTemplate>

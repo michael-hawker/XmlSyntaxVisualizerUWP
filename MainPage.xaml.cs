@@ -169,6 +169,8 @@ namespace XmlSyntaxVisualizerUwp
         public int SpanEnd { get; set; }
 
         public int Length => SpanEnd - SpanStart;
+        public bool IsError => Errors != null && Errors.Count() > 0;
+        public string ErrorText => IsError ? string.Join(' ', Errors.Select(e => e.Id.ToString().Substring(4) + ": " + e.Description)) : string.Empty;
 
         public List<XmlSyntaxData> Children { get; set; }
 
