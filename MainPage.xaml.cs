@@ -31,6 +31,7 @@ namespace XmlSyntaxVisualizerUwp
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        #region Properties
         public List<XmlSyntaxData> RootNodes
         {
             get { return (List<XmlSyntaxData>)GetValue(RootNodesProperty); }
@@ -42,6 +43,35 @@ namespace XmlSyntaxVisualizerUwp
             DependencyProperty.Register(nameof(RootNodes), typeof(List<XmlSyntaxData>), typeof(MainPage), new PropertyMetadata(new List<XmlSyntaxData>()));
 
         private SyntaxNode _lastRoot;
+        private XmlSyntaxData _lastData;
+        #endregion
+
+        #region Style Resources
+        private readonly CssLineStyle HighlightStyle = new CssLineStyle()
+        {
+            BackgroundColor = new SolidColorBrush(Colors.Yellow),
+        };
+
+        private static readonly SolidColorBrush ListBrush = new SolidColorBrush(Colors.Cyan);
+        private static readonly SolidColorBrush TokenBrush = new SolidColorBrush(Colors.LightGreen);
+        private static readonly SolidColorBrush SyntaxBrush = new SolidColorBrush(Colors.MediumPurple);
+        private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Colors.Black);
+
+        private static SolidColorBrush ColorSelector(string typeclass)
+        {
+            switch (typeclass)
+            {
+                case "list":
+                    return ListBrush;
+                case "token":
+                    return TokenBrush;
+                case "syntax":
+                    return SyntaxBrush;
+                default:
+                    return DefaultBrush;
+            }
+        }
+        #endregion
 
         public MainPage()
         {
@@ -68,6 +98,7 @@ namespace XmlSyntaxVisualizerUwp
             RootNodes = list;
         }
 
+        #region Hover/Highlighting
         private async void XmlEditor_Loading(object sender, RoutedEventArgs e)
         {
             var languages = new Monaco.LanguagesHelper(XmlEditor);
@@ -104,8 +135,6 @@ namespace XmlSyntaxVisualizerUwp
             });
         }
 
-        private XmlSyntaxData _lastData;
-
         private void TreeViewItem_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
             if (sender is Microsoft.UI.Xaml.Controls.TreeViewItem item &&
@@ -122,14 +151,12 @@ namespace XmlSyntaxVisualizerUwp
                 XmlEditor.Decorations.Add(
                     new IModelDeltaDecoration(new Range((uint)line_s, (uint)col_s, (uint)line_e, (uint)(col_e + 1)), new IModelDecorationOptions()
                 {
-                    ClassName = new CssLineStyle() // TODO: Save these styles so we don't keep regenerating them and adding new ones.
-                    {
-                        BackgroundColor = new SolidColorBrush(Colors.Yellow),
-                    },
+                    ClassName = HighlightStyle,
                     Stickiness = TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges
                 }));
             }
         }
+        #endregion
     }
 
     public class XmlSyntaxData
