@@ -11,16 +11,26 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
         <monaco:CodeEditor x:Name="XmlEditor"
+                           KeyDown="XmlEditor_KeyDown"
                            Loading="XmlEditor_Loading"/>
 
+        <ScrollViewer Grid.Row="1">
+            <TextBlock x:Name="CleanedXml"/>
+        </ScrollViewer>
+
         <muxc:TreeView x:Name="XmlSyntaxTree" Grid.Column="1"
-                  ItemsSource="{x:Bind RootNodes, Mode=OneWay}">
+                       Grid.RowSpan="2"
+                       ItemsSource="{x:Bind RootNodes, Mode=OneWay}">
             <muxc:TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:XmlSyntaxData">
                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
@@ -54,5 +64,15 @@
                 </DataTemplate>
             </muxc:TreeView.ItemTemplate>
         </muxc:TreeView>
+
+        <StackPanel Grid.Row="2" Margin="4,4,0,0">
+            <TextBlock>
+                <Run>Cursor Position Line: </Run>
+                <Run Text="{x:Bind CurrentPosition.LineNumber, Mode=OneWay}"/>
+                <Run> Col: </Run>
+                <Run Text="{x:Bind CurrentPosition.Column, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Text="{x:Bind ElementInfo, Mode=OneWay}"/>
+        </StackPanel>
     </Grid>
 </Page>

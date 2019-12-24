@@ -42,6 +42,25 @@ namespace XmlSyntaxVisualizerUwp
         public static readonly DependencyProperty RootNodesProperty =
             DependencyProperty.Register(nameof(RootNodes), typeof(List<XmlSyntaxData>), typeof(MainPage), new PropertyMetadata(new List<XmlSyntaxData>()));
 
+        public Position CurrentPosition
+        {
+            get { return (Position)GetValue(CurrentPositionProperty); }
+            set { SetValue(CurrentPositionProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentPositionProperty =
+            DependencyProperty.Register(nameof(CurrentPosition), typeof(Position), typeof(MainPage), new PropertyMetadata(null));
+
+        public string ElementInfo
+        {
+            get { return (string)GetValue(ElementInfoProperty); }
+            set { SetValue(ElementInfoProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ElementInfo.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ElementInfoProperty =
+            DependencyProperty.Register(nameof(ElementInfo), typeof(string), typeof(MainPage), new PropertyMetadata(string.Empty));
+
         private SyntaxNode _lastRoot;
         private XmlSyntaxData _lastData;
         #endregion
@@ -96,6 +115,8 @@ namespace XmlSyntaxVisualizerUwp
             var list = new List<XmlSyntaxData>();
             list.Add(XmlSyntaxData.FromNode(_lastRoot));
             RootNodes = list;
+
+            XmlEditor_KeyDown(null, null); // Trigger position change
         }
 
         #region Hover/Highlighting
@@ -157,6 +178,59 @@ namespace XmlSyntaxVisualizerUwp
             }
         }
         #endregion
+
+        private static readonly int[] NonCharacterCodes = new int[] {
+            // Modifier Keys
+            16, 17, 18, 20, 91,
+            // Esc / Page Keys / Home / End / Insert
+            27, 33, 34, 35, 36, 45,
+            // Arrow Keys
+            37, 38, 39, 40,
+            // Function Keys
+            112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123
+        };
+
+        private async void XmlEditor_KeyDown(CodeEditor sender, WebKeyEventArgs args)
+        {
+            // TODO: Also update on mouse click, not currently supported via wrapper component.
+            if (args == null || NonCharacterCodes.Contains(args.KeyCode))
+            {
+                CurrentPosition = await XmlEditor.GetPositionAsync();
+
+                UpdateCurrentInfo();
+            }
+        }
+
+        private void UpdateCurrentInfo()
+        {
+            if (CurrentPosition == null)
+            {
+                return;
+            }
+
+            var index = XmlEditor.Text.GetCharacterIndex((int)CurrentPosition.LineNumber, (int)CurrentPosition.Column);
+
+            if (index == -1)
+            {
+                return;
+            }
+
+            var raw_node = _lastRoot.FindNode(index + 1);
+            var node = XmlSyntaxData.FromNode(raw_node, false);
+            var parent = XmlSyntaxData.FromNode(raw_node.Parent, false);
+
+            if (node != null)
+            {
+                // Refetch proper line/col from start of token
+                var (line_s, col_s) = XmlEditor.Text.GetLineColumnIndex(node.SpanStart);
+                var (line_e, col_e) = XmlEditor.Text.GetLineColumnIndex(node.SpanEnd - 1);
+
+                ElementInfo = node.Text + Environment.NewLine;
+                ElementInfo += node.Type + Environment.NewLine;
+                ElementInfo += "Parent:" + parent.Type + Environment.NewLine;
+                ElementInfo += "Parent Element:" + raw_node.ParentElement.Name + Environment.NewLine;
+            }
+        }
     }
 
     public class XmlSyntaxData
