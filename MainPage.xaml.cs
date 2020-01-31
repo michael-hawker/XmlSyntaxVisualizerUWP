@@ -1,4 +1,7 @@
-﻿using Microsoft.Language.Xml;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.Language.Xml;
 using Monaco;
 using Monaco.Editor;
 using Monaco.Helpers;
@@ -21,8 +24,6 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace XmlSyntaxVisualizerUwp
 {
