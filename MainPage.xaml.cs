@@ -228,7 +228,7 @@ namespace XmlSyntaxVisualizerUwp
                 ElementInfo = node.Text + Environment.NewLine;
                 ElementInfo += node.Type + Environment.NewLine;
                 ElementInfo += "Parent:" + parent.Type + Environment.NewLine;
-                ElementInfo += "Parent Element:" + raw_node.ParentElement.Name + Environment.NewLine;
+                ElementInfo += "Parent Element:" + raw_node?.ParentElement?.Name + Environment.NewLine;
             }
         }
     }
