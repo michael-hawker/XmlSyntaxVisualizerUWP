@@ -8,21 +8,16 @@ using Monaco.Helpers;
 using Monaco.Languages;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI;
-using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+
+using MUX = Microsoft.UI.Xaml.Controls;
 
 namespace XmlSyntaxVisualizerUwp
 {
@@ -167,6 +162,8 @@ namespace XmlSyntaxVisualizerUwp
                 parent = XmlSyntaxData.FromNode(raw_node.Parent, false); // Do the same for the Parent (if we have one)
             }
 
+            TreeView_ScrollNode(raw_node); // Show Item in Tree
+
             if (node != null)
             {
                 // Refetch proper line/col from start of token (as it may start earlier than where the caret is)
@@ -182,7 +179,7 @@ namespace XmlSyntaxVisualizerUwp
         }
         #endregion
 
-        #region Hover/Highlighting UI Helpers
+        #region Monaco -> TreeView Helpers
         private async void XmlEditor_Loading(object sender, RoutedEventArgs e)
         {
             var languages = new Monaco.LanguagesHelper(XmlEditor);
@@ -222,6 +219,46 @@ namespace XmlSyntaxVisualizerUwp
             });
         }
 
+        private void TreeView_ScrollNode(SyntaxNode raw_node)
+        {
+            // We need to find the UI container that contains the same node as the one we have here
+            var node = FindNode(RootNodes, raw_node.GetHashCode());
+            var container = XmlSyntaxTree.ContainerFromItem(node) as MUX.TreeViewItem;
+
+            if (container != null)
+            {
+                container?.StartBringIntoView(new BringIntoViewOptions()
+                {
+                    VerticalAlignmentRatio = 0.5f
+                });
+
+                container.IsSelected = true;
+            }
+        }
+
+        private XmlSyntaxData FindNode(List<XmlSyntaxData> nodes, int id)
+        {
+            foreach(var node in nodes)
+            {
+                if (node.HashId == id)
+                {
+                    return node;
+                }
+                else if (node.Children.Count > 0)
+                {
+                    var value = FindNode(node.Children, id);
+                    if (value != null)
+                    {
+                        return value;
+                    }
+                }
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region TreeView -> Monaco Helpers
         private void TreeViewItem_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
             // When we move our mouse over a node in the TreeView, highlight that Xml Node in our editor with a highlighter.

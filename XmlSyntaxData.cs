@@ -13,6 +13,7 @@ namespace XmlSyntaxVisualizerUwp
     /// </summary>
     public class XmlSyntaxData
     {
+        public int HashId { get; set; }
         public string Type { get; set; }
         public string TypeClass { get; set; }
         public string Text { get; set; }
@@ -24,6 +25,7 @@ namespace XmlSyntaxVisualizerUwp
         public bool IsError => Errors != null && Errors.Count() > 0;
         public string ErrorText => IsError ? string.Join(' ', Errors.Select(e => e.Id.ToString().Substring(4) + ": " + e.Description)) : string.Empty;
 
+        // Hierarchical reference for TreeView templates
         public List<XmlSyntaxData> Children { get; set; }
 
         /// <summary>
@@ -36,6 +38,7 @@ namespace XmlSyntaxVisualizerUwp
         {
             return new XmlSyntaxData()
             {
+                HashId = node.GetHashCode(),
                 Type = node.IsList ? "SyntaxList" : node.GetType().Name,
                 TypeClass = node.IsList ? "list" : (node.IsToken ? "token" : "syntax"),
                 Text = node.IsToken ? (node as SyntaxToken).Text : string.Empty,
