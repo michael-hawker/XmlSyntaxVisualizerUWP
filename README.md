@@ -12,10 +12,6 @@ It is based off of the suggested web-based sample found [here](https://github.co
 
 Once the sample is running, click on the tree on the right to highlight text on the left.  You can also hover over text on the left to see information about the tree on the right.
 
-## Known Issues
-
-- Cursor position doesn't update on click, only on keyboard caret move/edit.
-
 ## Third-Party Notice
 
 Uses the [Monaco UWP Editor Wrapper](https://github.com/hawkerm/monaco-editor-uwp), [XmlParser](https://github.com/KirillOsenkov/XmlParser), and [WinUI](https://aka.ms/winui).

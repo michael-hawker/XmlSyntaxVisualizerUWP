@@ -98,6 +98,7 @@ namespace XmlSyntaxVisualizerUwp
             this.InitializeComponent();
 
             XmlEditor.RegisterPropertyChangedCallback(CodeEditor.TextProperty, XmlEditor_TextChanged);
+            XmlEditor.RegisterPropertyChangedCallback(CodeEditor.SelectedRangeProperty, XmlEditor_RangeChanged);
             
             // Load example file
             using (var stream = GetType().Assembly.GetManifestResourceStream("XmlSyntaxVisualizerUwp.ExampleDocument.xml"))
@@ -105,6 +106,11 @@ namespace XmlSyntaxVisualizerUwp
             {
                 XmlEditor.Text = reader.ReadToEnd();
             }
+        }
+
+        private void XmlEditor_RangeChanged(DependencyObject sender, DependencyProperty dp)
+        {
+            UpdateCurrentInfo();
         }
 
         private void XmlEditor_TextChanged(DependencyObject sender, DependencyProperty dp)
@@ -117,7 +123,7 @@ namespace XmlSyntaxVisualizerUwp
             list.Add(XmlSyntaxData.FromNode(_lastRoot));
             RootNodes = list;
 
-            XmlEditor_KeyDown(null, null); // Trigger position change
+            UpdateCurrentInfo();
         }
 
         #region Hover/Highlighting
@@ -180,30 +186,10 @@ namespace XmlSyntaxVisualizerUwp
         }
         #endregion
 
-        private static readonly int[] NonCharacterCodes = new int[] {
-            // Modifier Keys
-            16, 17, 18, 20, 91,
-            // Esc / Page Keys / Home / End / Insert
-            27, 33, 34, 35, 36, 45,
-            // Arrow Keys
-            37, 38, 39, 40,
-            // Function Keys
-            112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123
-        };
-
-        private async void XmlEditor_KeyDown(CodeEditor sender, WebKeyEventArgs args)
+        private async void UpdateCurrentInfo()
         {
-            // TODO: Also update on mouse click, not currently supported via wrapper component.
-            if (args == null || NonCharacterCodes.Contains(args.KeyCode))
-            {
-                CurrentPosition = await XmlEditor.GetPositionAsync();
+            CurrentPosition = await XmlEditor.GetPositionAsync();
 
-                UpdateCurrentInfo();
-            }
-        }
-
-        private void UpdateCurrentInfo()
-        {
             if (CurrentPosition == null)
             {
                 return;

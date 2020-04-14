@@ -21,7 +21,6 @@
         </Grid.ColumnDefinitions>
 
         <monaco:CodeEditor x:Name="XmlEditor"
-                           KeyDown="XmlEditor_KeyDown"
                            Loading="XmlEditor_Loading"/>
 
         <ScrollViewer Grid.Row="1">
