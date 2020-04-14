@@ -218,7 +218,11 @@ namespace XmlSyntaxVisualizerUwp
 
             var raw_node = _lastRoot.FindNode(index + 1);
             var node = XmlSyntaxData.FromNode(raw_node, false);
-            var parent = XmlSyntaxData.FromNode(raw_node.Parent, false);
+            XmlSyntaxData parent = null;
+            if (raw_node.Parent != null)
+            {
+                parent = XmlSyntaxData.FromNode(raw_node.Parent, false);
+            }            
 
             if (node != null)
             {
@@ -228,7 +232,7 @@ namespace XmlSyntaxVisualizerUwp
 
                 ElementInfo = node.Text + Environment.NewLine;
                 ElementInfo += node.Type + Environment.NewLine;
-                ElementInfo += "Parent:" + parent.Type + Environment.NewLine;
+                ElementInfo += "Parent:" + parent?.Type + Environment.NewLine;
                 ElementInfo += "Parent Element:" + raw_node?.ParentElement?.Name + Environment.NewLine;
             }
         }
