@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using Windows.Foundation;
@@ -232,47 +231,5 @@ namespace XmlSyntaxVisualizerUwp
                 ElementInfo += "Parent Element:" + raw_node?.ParentElement?.Name + Environment.NewLine;
             }
         }
-    }
-
-    public class XmlSyntaxData
-    {
-        public string Type { get; set; }
-        public string TypeClass { get; set; }
-        public string Text { get; set; }
-        public List<XmlSyntaxError> Errors { get; set; }
-        public int SpanStart { get; set; }
-        public int SpanEnd { get; set; }
-
-        public int Length => SpanEnd - SpanStart;
-        public bool IsError => Errors != null && Errors.Count() > 0;
-        public string ErrorText => IsError ? string.Join(' ', Errors.Select(e => e.Id.ToString().Substring(4) + ": " + e.Description)) : string.Empty;
-
-        public List<XmlSyntaxData> Children { get; set; }
-
-        public static XmlSyntaxData FromNode(SyntaxNode node, bool withChildren = true)
-        {
-            return new XmlSyntaxData()
-            {
-                Type = node.IsList ? "SyntaxList" : node.GetType().Name,
-                TypeClass = node.IsList ? "list" : (node.IsToken ? "token" : "syntax"),
-                Text = node.IsToken ? (node as SyntaxToken).Text : string.Empty,
-                Errors = node.ContainsDiagnostics ?
-                    node.GetDiagnostics().Select(d => new XmlSyntaxError()
-                    {
-                        Id = d.ErrorID,
-                        Description = d.GetDescription()
-                    }).ToList()
-                    : Array.Empty<XmlSyntaxError>().ToList(),
-                SpanStart = node.FullSpan.Start,
-                SpanEnd = node.FullSpan.End,
-                Children = withChildren ? node.ChildNodes.Select(child => XmlSyntaxData.FromNode(child)).ToList() : Array.Empty<XmlSyntaxData>().ToList()
-            };
-        }
-    }
-
-    public class XmlSyntaxError
-    {
-        public ERRID Id { get; set; }
-        public string Description { get; set; }
     }
 }
