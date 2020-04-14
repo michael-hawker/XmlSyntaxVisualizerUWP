@@ -15,7 +15,6 @@ Once the sample is running, click on the tree on the right to highlight text on 
 ## Known Issues
 
 - Cursor position doesn't update on click, only on keyboard caret move/edit.
-- Parsing Tree doesn't expand automatically when re-parsing (need to update WinUI version when fix ships, see https://github.com/microsoft/microsoft-ui-xaml/issues/1790).
 
 ## Third-Party Notice
 
