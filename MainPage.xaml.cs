@@ -184,6 +184,16 @@ namespace XmlSyntaxVisualizerUwp
                 }));
             }
         }
+
+        private async void XmlSyntaxTree_ItemInvoked(Microsoft.UI.Xaml.Controls.TreeView sender, Microsoft.UI.Xaml.Controls.TreeViewItemInvokedEventArgs args)
+        {
+            if (_lastData != null)
+            {
+                var (line_s, col_s) = XmlEditor.Text.GetLineColumnIndex(_lastData.SpanStart);
+
+                await XmlEditor.SetPositionAsync(new Position((uint)line_s, (uint)col_s));
+            }
+        }
         #endregion
 
         private async void UpdateCurrentInfo()

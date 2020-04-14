@@ -29,7 +29,8 @@
 
         <muxc:TreeView x:Name="XmlSyntaxTree" Grid.Column="1"
                        Grid.RowSpan="2"
-                       ItemsSource="{x:Bind RootNodes, Mode=OneWay}">
+                       ItemsSource="{x:Bind RootNodes, Mode=OneWay}"
+                       ItemInvoked="XmlSyntaxTree_ItemInvoked">
             <muxc:TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:XmlSyntaxData">
                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
