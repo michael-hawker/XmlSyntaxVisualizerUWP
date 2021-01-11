@@ -65,14 +65,30 @@
             </muxc:TreeView.ItemTemplate>
         </muxc:TreeView>
 
-        <StackPanel Grid.Row="2" Margin="4,4,0,0">
-            <TextBlock>
+        <muxc:TabView Grid.Row="2" Margin="0,1,0,0">
+            <muxc:TabViewItem Header="Caret Info">
+                <muxc:TabViewItem.IconSource>
+                    <muxc:SymbolIconSource Symbol="Rename"/>
+                </muxc:TabViewItem.IconSource>
+                <StackPanel Margin="4,4,0,0">
+                    <TextBlock>
                 <Run>Cursor Position Line: </Run>
                 <Run Text="{x:Bind CurrentPosition.LineNumber, Mode=OneWay}"/>
                 <Run> Col: </Run>
                 <Run Text="{x:Bind CurrentPosition.Column, Mode=OneWay}"/>
-            </TextBlock>
-            <TextBlock Text="{x:Bind ElementInfo, Mode=OneWay}"/>
-        </StackPanel>
+                    </TextBlock>
+                    <TextBlock Text="{x:Bind ElementInfo, Mode=OneWay}"/>
+                </StackPanel>
+            </muxc:TabViewItem>
+            <muxc:TabViewItem Header="Valid XML Output">
+                <muxc:TabViewItem.IconSource>
+                    <muxc:FontIconSource FontFamily="Segoe MDL2 Assets" Glyph="&#xE9D5;"/>
+                </muxc:TabViewItem.IconSource>
+                <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+                    <TextBlock x:Name="ValidXmlDoc"/>
+                </ScrollViewer>
+            </muxc:TabViewItem>
+        </muxc:TabView>
     </Grid>
 </Page>

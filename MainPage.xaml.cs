@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
+using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -129,7 +130,15 @@ namespace XmlSyntaxVisualizerUwp
             RootNodes = list;
 
             // Update our current location's status
-            UpdateCurrentInfo();
+            _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                UpdateCurrentInfo();
+            });
+
+            // Update the validation status in the Editor
+            var validRoot = XmlParserHelpers.GetValidXmlTree(XmlEditor.Text);
+
+            ValidXmlDoc.Text = validRoot.ToFullString();
         }
 
         /// <summary>
@@ -227,7 +236,7 @@ namespace XmlSyntaxVisualizerUwp
 
             if (container != null)
             {
-                container?.StartBringIntoView(new BringIntoViewOptions()
+                container.StartBringIntoView(new BringIntoViewOptions()
                 {
                     VerticalAlignmentRatio = 0.5f
                 });
