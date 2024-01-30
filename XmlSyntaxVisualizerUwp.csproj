@@ -156,13 +156,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GuiLabs.Language.Xml">
-      <Version>1.2.46</Version>
+      <Version>1.2.88</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.10</Version>
+      <Version>6.2.14</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.UI.Xaml">
-      <Version>2.4.2</Version>
+      <Version>2.7.3</Version>
     </PackageReference>
     <PackageReference Include="Monaco.Editor">
       <Version>0.8.1-alpha</Version>
