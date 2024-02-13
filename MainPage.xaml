@@ -5,7 +5,7 @@
     xmlns:local="using:XmlSyntaxVisualizerUwp"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:monaco="using:Monaco"
+    xmlns:edit="using:WinUIEditor"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -20,8 +20,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <monaco:CodeEditor x:Name="XmlEditor"
-                           Loading="XmlEditor_Loading"/>
+        <edit:CodeEditorControl x:Name="XmlEditor"/>
 
         <ScrollViewer Grid.Row="1">
             <TextBlock x:Name="CleanedXml"/>
@@ -73,9 +72,9 @@
                 <StackPanel Margin="4,4,0,0">
                     <TextBlock>
                 <Run>Cursor Position Line: </Run>
-                <Run Text="{x:Bind CurrentPosition.LineNumber, Mode=OneWay}"/>
+                <Run Text="{x:Bind LineNumber, Mode=OneWay}"/>
                 <Run> Col: </Run>
-                <Run Text="{x:Bind CurrentPosition.Column, Mode=OneWay}"/>
+                <Run Text="{x:Bind Column, Mode=OneWay}"/>
                     </TextBlock>
                     <TextBlock Text="{x:Bind ElementInfo, Mode=OneWay}"/>
                 </StackPanel>
