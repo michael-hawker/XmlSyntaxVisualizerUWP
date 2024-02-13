@@ -71,6 +71,8 @@ namespace XmlSyntaxVisualizerUwp
         #endregion
 
         #region Style Resources
+        private bool _isLightMode = false;
+
         private static readonly SolidColorBrush ListBrush = new SolidColorBrush(Colors.Cyan);
         private static readonly SolidColorBrush TokenBrush = new SolidColorBrush(Colors.LightGreen);
         private static readonly SolidColorBrush SyntaxBrush = new SolidColorBrush(Colors.MediumPurple);
@@ -102,6 +104,7 @@ namespace XmlSyntaxVisualizerUwp
             this.InitializeComponent();
 
             // Register for changes to Editor text or position.
+            XmlEditor.DefaultColorsChanged += XmlEditor_DefaultColorsChanged;
             XmlEditor.Editor.Modified += Editor_Modified;
             XmlEditor.Editor.UpdateUI += Editor_UpdateUI;
             XmlEditor.Editor.MouseDwellTime = 500;
@@ -113,6 +116,11 @@ namespace XmlSyntaxVisualizerUwp
             {
                 XmlEditor.Editor.SetText(reader.ReadToEnd());
             }
+        }
+
+        private void XmlEditor_DefaultColorsChanged(object sender, ElementTheme e)
+        {
+            _isLightMode = e == ElementTheme.Light;
         }
 
         private void Editor_Modified(WinUIEditor.Editor sender, WinUIEditor.ModifiedEventArgs args)
@@ -292,9 +300,15 @@ namespace XmlSyntaxVisualizerUwp
 
                 XmlEditor.Editor.IndicatorCurrent = 0;
                 XmlEditor.Editor.IndicSetStyle(0, IndicatorStyle.FullBox);
+                XmlEditor.Editor.IndicSetFore(0, 0x00FFFF); // Yellow (BGR)
+                if (_isLightMode)
+                {
+                    XmlEditor.Editor.IndicSetAlpha(0, Alpha.Opaque);
+                }
+                // TODO: else -> should set to a transparent alpha value (whatever the default is?)
+                XmlEditor.Editor.IndicSetUnder(0, true);
                 XmlEditor.Editor.IndicatorFillRange(data.SpanStart, data.SpanEnd - data.SpanStart);
 
-                ////ClassName = HighlightStyle,
                 ////Stickiness = TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges
             }
         }
