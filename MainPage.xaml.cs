@@ -305,7 +305,10 @@ namespace XmlSyntaxVisualizerUwp
                 {
                     XmlEditor.Editor.IndicSetAlpha(0, Alpha.Opaque);
                 }
-                // TODO: else -> should set to a transparent alpha value (whatever the default is?)
+                else
+                {
+                    XmlEditor.Editor.IndicSetAlpha(0, (Alpha)30); // 30 is default
+                }
                 XmlEditor.Editor.IndicSetUnder(0, true);
                 XmlEditor.Editor.IndicatorFillRange(data.SpanStart, data.SpanEnd - data.SpanStart);
 
