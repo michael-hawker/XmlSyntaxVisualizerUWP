@@ -2,6 +2,7 @@
     x:Class="XmlSyntaxVisualizerUwp.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:XmlSyntax.Models"
     xmlns:local="using:XmlSyntaxVisualizerUwp"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -31,7 +32,7 @@
                        ItemsSource="{x:Bind RootNodes, Mode=OneWay}"
                        ItemInvoked="XmlSyntaxTree_ItemInvoked">
             <muxc:TreeView.ItemTemplate>
-                <DataTemplate x:DataType="local:XmlSyntaxData">
+                <DataTemplate x:DataType="models:XmlSyntaxData">
                     <muxc:TreeViewItem ItemsSource="{x:Bind Children}"
                                        IsExpanded="True"
                                        PointerMoved="TreeViewItem_PointerMoved">

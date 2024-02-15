@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace XmlSyntaxVisualizerUwp;
+namespace XmlSyntax.Models;
 
 /// <summary>
 /// Data class used to expose interesting Xml <see cref="SyntaxNode"/> properties to the UI.
@@ -23,7 +23,7 @@ public class XmlSyntaxData
 
     public int Length => SpanEnd - SpanStart;
     public bool IsError => Errors != null && Errors.Count() > 0;
-    public string ErrorText => IsError ? string.Join(' ', Errors.Select(e => e.Id.ToString().Substring(4) + ": " + e.Description)) : string.Empty;
+    public string ErrorText => IsError ? string.Join(" ", Errors.Select(e => e.Id.ToString().Substring(4) + ": " + e.Description)) : string.Empty;
 
     // Hierarchical reference for TreeView templates
     public List<XmlSyntaxData> Children { get; set; }

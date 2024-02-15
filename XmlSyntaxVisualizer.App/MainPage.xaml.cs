@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using WinUIEditor;
+using XmlSyntax.Models;
 using MUX = Microsoft.UI.Xaml.Controls;
 
 namespace XmlSyntaxVisualizerUwp;

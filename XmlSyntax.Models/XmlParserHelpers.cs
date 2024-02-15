@@ -1,7 +1,7 @@
 ﻿using Microsoft.Language.Xml;
 using System.Linq;
 
-namespace XmlSyntaxVisualizerUwp;
+namespace XmlSyntax.Models;
 
 public static class XmlParserHelpers
 {

@@ -3,7 +3,7 @@
 
 using Microsoft.Language.Xml;
 
-namespace XmlSyntaxVisualizerUwp;
+namespace XmlSyntax.Models;
 
 /// <summary>
 /// Light-weight wrapper around error data.
