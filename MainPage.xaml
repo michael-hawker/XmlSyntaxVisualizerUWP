@@ -71,10 +71,13 @@
                 </muxc:TabViewItem.IconSource>
                 <StackPanel Margin="4,4,0,0">
                     <TextBlock>
-                <Run>Cursor Position Line: </Run>
-                <Run Text="{x:Bind LineNumber, Mode=OneWay}"/>
-                <Run> Col: </Run>
-                <Run Text="{x:Bind Column, Mode=OneWay}"/>
+                        <Run>Cursor Position Line: </Run>
+                        <Run Text="{x:Bind LineNumber, Mode=OneWay}"/>
+                        <Run> Col: </Run>
+                        <Run Text="{x:Bind Column, Mode=OneWay}"/>
+                        <Run> (</Run>
+                        <Run Text="{x:Bind Index, Mode=OneWay}"/>
+                        <Run>)</Run>
                     </TextBlock>
                     <TextBlock Text="{x:Bind ElementInfo, Mode=OneWay}"/>
                 </StackPanel>

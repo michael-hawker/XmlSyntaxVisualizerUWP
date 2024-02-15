@@ -55,6 +55,16 @@ namespace XmlSyntaxVisualizerUwp
         public static readonly DependencyProperty LineNumberProperty =
             DependencyProperty.Register(nameof(LineNumber), typeof(int), typeof(MainPage), new PropertyMetadata(0));
 
+        public int Index
+        {
+            get { return (int)GetValue(IndexProperty); }
+            set { SetValue(IndexProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Index.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IndexProperty =
+            DependencyProperty.Register(nameof(Index), typeof(int), typeof(MainPage), new PropertyMetadata(0));
+
         public string ElementInfo
         {
             get { return (string)GetValue(ElementInfoProperty); }
@@ -178,18 +188,18 @@ namespace XmlSyntaxVisualizerUwp
         private void UpdateCurrentInfo()
         {
             // Figure out where we are.
-            var index = XmlEditor.Editor.CurrentPos;
+            Index = (int)XmlEditor.Editor.CurrentPos;
 
-            if (index == -1)
+            if (Index == -1)
             {
                 return;
             }
 
-            LineNumber = (int)XmlEditor.Editor.LineFromPosition(index) + 1;
-            Column = (int)XmlEditor.Editor.GetColumn(index) + 1;
+            LineNumber = (int)XmlEditor.Editor.LineFromPosition(Index) + 1;
+            Column = (int)XmlEditor.Editor.GetColumn(Index) + 1;
 
             // Use the caret position (as index) to find the corresponding Xml Node from our parsed tree.
-            var raw_node = _lastRoot.FindNode((int)index);
+            var raw_node = _lastRoot.FindNode(Index);
             var node = XmlSyntaxData.FromNode(raw_node, false); // Translate to our UI-Friendly object
             XmlSyntaxData parent = null;
             if (raw_node.Parent != null)
