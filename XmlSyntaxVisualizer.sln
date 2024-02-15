@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlSyntaxVisualizer.App", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlSyntax.Models", "XmlSyntax.Models\XmlSyntax.Models.csproj", "{88D32CFF-455B-4AAC-AC1D-0917BD3C4502}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlSyntax.Tests", "XmlSyntax.Tests\XmlSyntax.Tests.csproj", "{7AB154DF-DF4F-4613-98A4-56337CF5E43E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,26 @@ Global
 		{88D32CFF-455B-4AAC-AC1D-0917BD3C4502}.Release|x64.Build.0 = Release|Any CPU
 		{88D32CFF-455B-4AAC-AC1D-0917BD3C4502}.Release|x86.ActiveCfg = Release|Any CPU
 		{88D32CFF-455B-4AAC-AC1D-0917BD3C4502}.Release|x86.Build.0 = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|ARM.Build.0 = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|x64.Build.0 = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Debug|x86.Build.0 = Debug|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|ARM.ActiveCfg = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|ARM.Build.0 = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|ARM64.Build.0 = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|x64.ActiveCfg = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|x64.Build.0 = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7AB154DF-DF4F-4613-98A4-56337CF5E43E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
