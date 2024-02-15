@@ -3,15 +3,14 @@
 
 using Microsoft.Language.Xml;
 
-namespace XmlSyntaxVisualizerUwp
-{
-    /// <summary>
-    /// Light-weight wrapper around error data.
-    /// </summary>
-    public class XmlSyntaxError
-    {
-        public ERRID Id { get; set; }
+namespace XmlSyntaxVisualizerUwp;
 
-        public string Description { get; set; }
-    }
+/// <summary>
+/// Light-weight wrapper around error data.
+/// </summary>
+public class XmlSyntaxError
+{
+    public ERRID Id { get; set; }
+
+    public string Description { get; set; }
 }
