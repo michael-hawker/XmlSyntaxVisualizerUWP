@@ -29,9 +29,11 @@ public static class XmlDocumentSyntaxExtensions
     ///   <item>Each range is widened leftward to consume any whitespace that immediately
     ///         precedes it in the source (so removing a stray attribute doesn't leave a
     ///         double space behind).</item>
-    ///   <item>If an unclosed XML string consumed a tag-closing <c>&gt;</c> or <c>/&gt;</c>,
-    ///         the trailing tag-boundary characters are trimmed back out of the range so
-    ///         they survive removal.</item>
+    ///   <item>If an unclosed XML attribute string consumed a tag-closing <c>&gt;</c> or
+    ///         <c>/&gt;</c>, the trailing tag-boundary characters are trimmed back out of
+    ///         the range so they survive removal. This trim only applies to attribute
+    ///         removals — for an element removal the trailing <c>&gt;</c> belongs to the
+    ///         element being removed and must be deleted with it.</item>
     /// </list>
     /// Note: diagnostics in this library are recorded only on the immediate offending node —
     /// they do <em>not</em> propagate up the tree — so we cannot short-circuit the walk
@@ -42,20 +44,20 @@ public static class XmlDocumentSyntaxExtensions
         if (tree is null) throw new ArgumentNullException(nameof(tree));
 
         var sourceText = tree.ToFullString();
-        var rawRanges = new List<Range>();
-        Collect(tree, rawRanges);
+        var raw = new List<RemovalCandidate>();
+        Collect(tree, raw);
 
-        return PostProcess(rawRanges, sourceText);
+        return PostProcess(raw, sourceText);
     }
 
-    private static void Collect(SyntaxNode node, List<Range> ranges)
+    private static void Collect(SyntaxNode node, List<RemovalCandidate> ranges)
     {
         if (HasOwnDiagnostics(node))
         {
             var enclosing = FindEnclosingRemovable(node);
             if (enclosing != null)
             {
-                ranges.Add(ToRange(enclosing.FullSpan));
+                ranges.Add(new RemovalCandidate(enclosing));
             }
         }
 
@@ -68,7 +70,7 @@ public static class XmlDocumentSyntaxExtensions
                     var enclosing = FindEnclosingRemovable(token);
                     if (enclosing != null)
                     {
-                        ranges.Add(ToRange(enclosing.FullSpan));
+                        ranges.Add(new RemovalCandidate(enclosing));
                     }
                 }
             }
@@ -115,42 +117,48 @@ public static class XmlDocumentSyntaxExtensions
         return null;
     }
 
-    private static IReadOnlyList<Range> PostProcess(List<Range> raw, string source)
+    private static IReadOnlyList<Range> PostProcess(List<RemovalCandidate> raw, string source)
     {
         if (raw.Count == 0) return Array.Empty<Range>();
 
-        // 1. Drop ranges that strictly contain another candidate (smallest cause wins).
+        // 1. Drop ranges that overlap a smaller candidate (smallest cause wins).
         var ordered = raw
-            .Select(r => (Start: r.Start.Value, End: r.End.Value))
-            .Distinct()
-            .OrderBy(r => r.End - r.Start)
+            .GroupBy(c => (c.Start, c.End))
+            .Select(g => g.First())
+            .OrderBy(c => c.End - c.Start)
             .ToList();
 
-        var kept = new List<(int Start, int End)>();
+        var kept = new List<RemovalCandidate>();
         foreach (var candidate in ordered)
         {
-            var overlapsLarger = kept.Any(k => Overlaps(k, candidate));
-            if (!overlapsLarger)
+            if (!kept.Any(k => Overlaps(k, candidate)))
             {
                 kept.Add(candidate);
             }
         }
 
-        // 2. Extend each range leftward over preceding whitespace.
-        // 3. Trim trailing tag-boundary characters ('>' or '/>') so that an unclosed
-        //    attribute string doesn't swallow the start tag's closing punctuation.
-        var refined = kept
-            .Select(r => TrimTrailingTagBoundary(r, source))
-            .Select(r => ExtendLeftOverWhitespace(r, source))
-            .Where(r => r.End > r.Start)
-            .OrderBy(r => r.Start)
-            .Select(r => new Range(r.Start, r.End))
-            .ToList();
+        // 2. Refine: trim swallowed tag-closers for attributes only, then extend left
+        //    over preceding whitespace.
+        var refined = new List<Range>(kept.Count);
+        foreach (var c in kept)
+        {
+            var range = (c.Start, c.End);
+            if (c.IsAttribute)
+            {
+                range = TrimTrailingTagBoundary(range, source);
+            }
+            range = ExtendLeftOverWhitespace(range, source);
 
-        return refined;
+            if (range.End > range.Start)
+            {
+                refined.Add(new Range(range.Start, range.End));
+            }
+        }
+
+        return refined.OrderBy(r => r.Start.Value).ToList();
     }
 
-    private static bool Overlaps((int Start, int End) a, (int Start, int End) b) =>
+    private static bool Overlaps(RemovalCandidate a, RemovalCandidate b) =>
         a.Start < b.End && b.Start < a.End;
 
     private static (int Start, int End) ExtendLeftOverWhitespace((int Start, int End) range, string source)
@@ -167,7 +175,6 @@ public static class XmlDocumentSyntaxExtensions
     {
         var end = Math.Min(range.End, source.Length);
 
-        // Trim trailing whitespace first so we can examine the meaningful tail.
         while (end > range.Start && IsXmlWhitespace(source[end - 1]))
         {
             end--;
@@ -187,5 +194,17 @@ public static class XmlDocumentSyntaxExtensions
 
     private static bool IsXmlWhitespace(char c) => c == ' ' || c == '\t' || c == '\r' || c == '\n';
 
-    private static Range ToRange(TextSpan span) => new Range(span.Start, span.End);
+    private readonly struct RemovalCandidate
+    {
+        public RemovalCandidate(SyntaxNode node)
+        {
+            Start = node.FullSpan.Start;
+            End = node.FullSpan.End;
+            IsAttribute = node is XmlAttributeSyntax;
+        }
+
+        public int Start { get; }
+        public int End { get; }
+        public bool IsAttribute { get; }
+    }
 }
