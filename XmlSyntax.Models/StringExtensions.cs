@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace XmlSyntax.Models;
@@ -22,61 +21,61 @@ public static class StringExtensions
         var merged = MergeRanges(ranges, text.Length);
         if (merged.Count == 0) return text;
 
-        var builder = new StringBuilder(text.Length);
+        var removed = 0;
+        for (var i = 0; i < merged.Count; i++) removed += merged[i].End.Value - merged[i].Start.Value;
+
+        var builder = new StringBuilder(text.Length - removed);
         var cursor = 0;
         foreach (var range in merged)
         {
             var start = range.Start.Value;
-            var end = range.End.Value;
-            if (start > cursor)
-            {
-                builder.Append(text, cursor, start - cursor);
-            }
-
-            cursor = end;
+            if (start > cursor) builder.Append(text, cursor, start - cursor);
+            cursor = range.End.Value;
         }
-
-        if (cursor < text.Length)
-        {
-            builder.Append(text, cursor, text.Length - cursor);
-        }
+        if (cursor < text.Length) builder.Append(text, cursor, text.Length - cursor);
 
         return builder.ToString();
     }
 
     private static List<Range> MergeRanges(IEnumerable<Range> ranges, int textLength)
     {
-        var sorted = ranges
-            .Select(r =>
-            {
-                if (r.Start.IsFromEnd || r.End.IsFromEnd)
-                {
-                    throw new ArgumentException("Ranges with from-end indices are not supported.", nameof(ranges));
-                }
-
-                var start = Math.Max(0, Math.Min(r.Start.Value, textLength));
-                var end = Math.Max(start, Math.Min(r.End.Value, textLength));
-                return new Range(start, end);
-            })
-            .Where(r => r.End.Value > r.Start.Value)
-            .OrderBy(r => r.Start.Value)
-            .ThenBy(r => r.End.Value)
-            .ToList();
-
-        var merged = new List<Range>();
-        foreach (var range in sorted)
+        var normalized = new List<Range>();
+        foreach (var r in ranges)
         {
-            if (merged.Count > 0 && merged[merged.Count - 1].End.Value >= range.Start.Value)
+            if (r.Start.IsFromEnd || r.End.IsFromEnd)
             {
-                var last = merged[merged.Count - 1];
-                merged[merged.Count - 1] = new Range(last.Start.Value, Math.Max(last.End.Value, range.End.Value));
+                throw new ArgumentException("Ranges with from-end indices are not supported.", nameof(ranges));
+            }
+
+            var start = Math.Max(0, Math.Min(r.Start.Value, textLength));
+            var end = Math.Max(start, Math.Min(r.End.Value, textLength));
+            if (end > start) normalized.Add(new Range(start, end));
+        }
+
+        if (normalized.Count <= 1) return normalized;
+
+        normalized.Sort(static (a, b) =>
+        {
+            var c = a.Start.Value.CompareTo(b.Start.Value);
+            return c != 0 ? c : a.End.Value.CompareTo(b.End.Value);
+        });
+
+        var merged = new List<Range>(normalized.Count);
+        var current = normalized[0];
+        for (var i = 1; i < normalized.Count; i++)
+        {
+            var next = normalized[i];
+            if (next.Start.Value <= current.End.Value)
+            {
+                if (next.End.Value > current.End.Value) current = new Range(current.Start.Value, next.End.Value);
             }
             else
             {
-                merged.Add(range);
+                merged.Add(current);
+                current = next;
             }
         }
-
+        merged.Add(current);
         return merged;
     }
 

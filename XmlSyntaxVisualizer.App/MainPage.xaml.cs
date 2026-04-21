@@ -73,7 +73,7 @@ public sealed partial class MainPage : Page
         DependencyProperty.Register(nameof(ElementInfo), typeof(string), typeof(MainPage), new PropertyMetadata(string.Empty));
 
     // Trackers for what we've last parsed
-    private SyntaxNode _lastRoot;
+    private XmlDocumentSyntax _lastRoot;
     private XmlSyntaxData _lastData;
     #endregion
 
@@ -158,7 +158,8 @@ public sealed partial class MainPage : Page
         XmlEditor.Editor.IndicatorClearRange(0, XmlEditor.Editor.Length);
 
         // Actually invoke the XmlParser Parser
-        _lastRoot = Parser.ParseText(XmlEditor.Editor.GetText(XmlEditor.Editor.Length));
+        var sourceText = XmlEditor.Editor.GetText(XmlEditor.Editor.Length);
+        _lastRoot = Parser.ParseText(sourceText);
 
         // Translate our parsed tree to our set of UI-ready nodes
         var list = new List<XmlSyntaxData>
@@ -173,10 +174,8 @@ public sealed partial class MainPage : Page
             UpdateCurrentInfo();
         });
 
-        // Update the validation status in the Editor
-        var validRoot = XmlParserHelpers.GetValidXmlTree(XmlEditor.Editor.GetText(XmlEditor.Editor.Length));
-
-        ValidXmlDoc.Text = validRoot.ToFullString();
+        // Update the validation status in the Editor (reuses the already-parsed tree).
+        ValidXmlDoc.Text = XmlParserHelpers.GetValidXml(sourceText, _lastRoot).Text;
     }
 
     /// <summary>

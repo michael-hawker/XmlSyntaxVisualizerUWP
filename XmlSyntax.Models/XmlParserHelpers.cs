@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Language.Xml;
-using System.Collections.Generic;
 
 namespace XmlSyntax.Models;
 
@@ -12,60 +10,53 @@ public static class XmlParserHelpers
     private const int MaxIterations = 20;
 
     /// <summary>
-    /// Parses <paramref name="text"/> and, if the result has parser diagnostics, iteratively
-    /// removes the smallest enclosing structural node whose tokens carry diagnostics until
-    /// the document re-parses cleanly (or no further progress can be made).
+    /// Parses <paramref name="text"/> and iteratively repairs it via a delete-only strategy.
     /// </summary>
     /// <remarks>
-    /// Uses a delete-only repair strategy: only characters from the source are removed, never
-    /// added or rewritten. Each iteration removes only the single smallest candidate range
-    /// reported by <see cref="XmlDocumentSyntaxExtensions.GetErrorRanges"/> so that downstream
-    /// "symptom" diagnostics (e.g. a real closing tag the parser misinterpreted because of
-    /// an earlier missing tag) get a chance to re-evaluate against the cleaned text rather
-    /// than being deleted as if they were the cause.
+    /// Convenience wrapper over <see cref="GetValidXml(string, XmlDocumentSyntax)"/> that
+    /// returns just the resulting tree (the original public surface). Prefer
+    /// <see cref="GetValidXml(string, XmlDocumentSyntax)"/> when you also need the cleaned
+    /// source text or already have a parsed tree.
     /// </remarks>
     public static XmlDocumentSyntax GetValidXmlTree(string text)
+        => GetValidXml(text, existingTree: null).Tree;
+
+    /// <summary>
+    /// Iteratively removes the smallest enclosing structural node bearing parser
+    /// diagnostics until the document parses cleanly (or no further progress can be made).
+    /// </summary>
+    /// <param name="text">Source text to repair.</param>
+    /// <param name="existingTree">
+    /// Optional pre-parsed tree of <paramref name="text"/>. When non-null, skips the
+    /// initial parse on the hot path. <strong>Must</strong> be the result of parsing
+    /// the exact same text — passing a tree from a different source corrupts the result.
+    /// </param>
+    /// <returns>The cleaned text and its parsed tree (always consistent with each other).</returns>
+    /// <remarks>
+    /// Only the single smallest candidate range is applied per iteration so cascading
+    /// "symptom" diagnostics (e.g. a real closing tag the parser misinterpreted because
+    /// of an earlier missing tag) get a chance to re-evaluate against the cleaned text.
+    /// </remarks>
+    public static (string Text, XmlDocumentSyntax Tree) GetValidXml(string text, XmlDocumentSyntax existingTree = null)
     {
         text ??= string.Empty;
-
-        var tree = Parser.ParseText(text);
+        var tree = existingTree ?? Parser.ParseText(text);
 
         for (var i = 0; i < MaxIterations; i++)
         {
-            var ranges = tree.GetErrorRanges();
-            if (ranges.Count == 0)
+            if (!XmlDocumentSyntaxExtensions.TryGetSmallestRepairRange(tree, text, out var range))
             {
                 break;
             }
 
-            var smallest = SmallestRange(ranges);
-            var cleaned = text.RemoveRanges(new[] { smallest });
-            if (cleaned.Length == text.Length)
-            {
-                // Guard against an infinite loop on pathological zero-width-only diagnostics.
-                break;
-            }
+            var start = range.Start.Value;
+            var end = range.End.Value;
+            if (end <= start) break;
 
-            text = cleaned;
+            text = text.Remove(start, end - start);
             tree = Parser.ParseText(text);
         }
 
-        return tree;
-    }
-
-    private static Range SmallestRange(IReadOnlyList<Range> ranges)
-    {
-        var best = ranges[0];
-        var bestLen = best.End.Value - best.Start.Value;
-        for (var i = 1; i < ranges.Count; i++)
-        {
-            var len = ranges[i].End.Value - ranges[i].Start.Value;
-            if (len < bestLen)
-            {
-                best = ranges[i];
-                bestLen = len;
-            }
-        }
-        return best;
+        return (text, tree);
     }
 }
