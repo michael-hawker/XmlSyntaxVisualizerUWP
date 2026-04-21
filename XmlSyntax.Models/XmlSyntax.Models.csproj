@@ -3,11 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	<LangVersion>11.0</LangVersion>
+	<PolySharpUsePublicAccessibilityForGeneratedTypes>true</PolySharpUsePublicAccessibilityForGeneratedTypes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GuiLabs.Language.Xml" Version="1.2.88" />
-    <PackageReference Include="PolySharp" Version="1.14.1">
+    <PackageReference Include="GuiLabs.Language.Xml" Version="1.2.119" />
+    <PackageReference Include="PolySharp" Version="1.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
