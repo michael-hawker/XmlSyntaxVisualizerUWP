@@ -3,30 +3,35 @@ using XmlSyntax.Models;
 namespace XmlSyntax.Tests;
 
 /// <summary>
-/// Tests for the iterative XML repair pipeline (<see cref="XmlParserHelpers.GetValidXmlTree"/>)
-/// that exercise the original design intent: a document containing a <strong>single
-/// point-in-time typing error</strong> — the kind a developer produces mid-keystroke
-/// while editing one tag or attribute. Each input here has exactly one broken construct;
-/// the expected output is the same document with that construct minimally repaired.
+/// "Doubled" variants of every scenario in <c>DocumentTrimmingTests.cs</c>. Each input
+/// here contains <strong>two independent instances of the same class of error</strong>
+/// in one document — the kind of state a developer might leave behind after a paste,
+/// rename, or mass-edit that introduced more than one broken construct simultaneously.
 /// <para>
-/// For scenarios that contain two independent instances of the same class of error
-/// in one document, see the partial defined in <c>DocumentTrimmingTests.Doubled.cs</c>.
+/// The expected outputs reflect what an ideal repair pass would produce
+/// (each broken construct minimally repaired, all valid content preserved). Tests in
+/// this file may currently fail; failures are diagnostic, not regressions.
 /// </para>
 /// </summary>
-[TestClass]
 public partial class DocumentTrimmingTests
 {
     [TestMethod]
-    public void ExtraneousPartialAttribute()
+    public void ExtraneousPartialAttribute_Doubled()
     {
         string input =
             """
-            <A One="Two" Hel/>
+            <Root>
+              <A One="Two" Hel/>
+              <B Three="Four" Wor/>
+            </Root>
             """;
 
         string expected_output =
             """
-            <A One="Two"/>
+            <Root>
+              <A One="Two"/>
+              <B Three="Four"/>
+            </Root>
             """;
 
         var output = XmlParserHelpers.GetValidXmlTree(input);
@@ -35,18 +40,26 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousPartialAttributeFullTag()
+    public void ExtraneousPartialAttributeFullTag_Doubled()
     {
         string input =
             """
-            <A One="Two" Hel>
-            </A>
+            <Root>
+              <A One="Two" Hel>
+              </A>
+              <B Three="Four" Wor>
+              </B>
+            </Root>
             """;
 
         string expected_output =
             """
-            <A One="Two">
-            </A>
+            <Root>
+              <A One="Two">
+              </A>
+              <B Three="Four">
+              </B>
+            </Root>
             """;
 
         var output = XmlParserHelpers.GetValidXmlTree(input);
@@ -55,16 +68,22 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousPartialAttributeValue()
+    public void ExtraneousPartialAttributeValue_Doubled()
     {
         string input =
             """
-            <A One="Two" Hello="World/>
+            <Root>
+              <A One="Two" Hello="World/>
+              <B Three="Four" Goodbye="Cruel/>
+            </Root>
             """;
 
         string expected_output =
             """
-            <A One="Two"/>
+            <Root>
+              <A One="Two"/>
+              <B Three="Four"/>
+            </Root>
             """;
 
         var output = XmlParserHelpers.GetValidXmlTree(input);
@@ -73,18 +92,26 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousPartialAttributeValueFullTag()
+    public void ExtraneousPartialAttributeValueFullTag_Doubled()
     {
         string input =
             """
-            <A One="Two" Hello="World>
-            </A>
+            <Root>
+              <A One="Two" Hello="World>
+              </A>
+              <B Three="Four" Goodbye="Cruel>
+              </B>
+            </Root>
             """;
 
         string expected_output =
             """
-            <A One="Two">
-            </A>
+            <Root>
+              <A One="Two">
+              </A>
+              <B Three="Four">
+              </B>
+            </Root>
             """;
 
         var output = XmlParserHelpers.GetValidXmlTree(input);
@@ -93,12 +120,13 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousUnclosedClosingTag()
+    public void ExtraneousUnclosedClosingTag_Doubled()
     {
         string input =
             """
             <A>
             </B>
+            </C>
             </A>
             """;
 
@@ -114,12 +142,13 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousUnclosedOpeningTag()
+    public void ExtraneousUnclosedOpeningTag_Doubled()
     {
         string input =
             """
             <A>
             <B>
+            <C>
             </A>
             """;
 
@@ -135,7 +164,7 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousUnclosedOpeningTagWithAttributeFull()
+    public void ExtraneousUnclosedOpeningTagWithAttributeFull_Doubled()
     {
         string input =
             """
@@ -144,7 +173,8 @@ public partial class DocumentTrimmingTests
               <A.B></A.B>
               <A B="value">
               <A>&#x03C0;</A>
-              <A>a &lt;</A>
+              <C D="other">
+              <C>&lt;</C>
             </X>
             """;
 
@@ -154,7 +184,7 @@ public partial class DocumentTrimmingTests
               <X/>
               <A.B></A.B>
               <A>&#x03C0;</A>
-              <A>a &lt;</A>
+              <C>&lt;</C>
             </X>
             """;
 
@@ -163,21 +193,29 @@ public partial class DocumentTrimmingTests
         Assert.AreEqual(expected_output, output.ToFullString());
     }
 
-
     [TestMethod]
-    public void ExtraneousUnclosedFullPropertyTag()
+    public void ExtraneousUnclosedFullPropertyTag_Doubled()
     {
         string input =
             """
-            <A B="value">
-              <A.Something>
-            </A>
+            <Root>
+              <A B="value">
+                <A.Something>
+              </A>
+              <C D="value">
+                <C.Other>
+              </C>
+            </Root>
             """;
 
         string expected_output =
             """
-            <A B="value">
-            </A>
+            <Root>
+              <A B="value">
+              </A>
+              <C D="value">
+              </C>
+            </Root>
             """;
 
         var output = XmlParserHelpers.GetValidXmlTree(input);
@@ -186,12 +224,14 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousUnclosedFullPropertyTagExtended()
+    public void ExtraneousUnclosedFullPropertyTagExtended_Doubled()
     {
         string input =
             """
               <A B="value">
                 <A.Something>
+            	</A
+                <A.Another>
             	</A
               </A>
             """;
@@ -208,7 +248,7 @@ public partial class DocumentTrimmingTests
     }
 
     [TestMethod]
-    public void ExtraneousUnclosedFullPropertyTagExtendedFull()
+    public void ExtraneousUnclosedFullPropertyTagExtendedFull_Doubled()
     {
         string input =
             """
@@ -218,6 +258,10 @@ public partial class DocumentTrimmingTests
                 <A.Something>
             	</A
               </A>
+              <C D="value">
+                <C.Something>
+            	</C
+              </C>
             </X>
             """;
 
@@ -227,6 +271,8 @@ public partial class DocumentTrimmingTests
               <A.B></A.B>
               <A B="value">
               </A>
+              <C D="value">
+              </C>
             </X>
             """;
 
