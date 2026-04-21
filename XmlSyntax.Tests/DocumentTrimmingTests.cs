@@ -165,4 +165,32 @@ public class DocumentTrimmingTests
 
         Assert.AreEqual(expected_output, output.ToFullString());
     }
+
+    [TestMethod]
+    public void ExtraneousUnclosedFullPropertyTagExtendedFull()
+    {
+        string input =
+            """
+            <X>
+              <A.B></A.B>
+              <A B="value">
+                <A.Something>
+            	</A
+              </A>
+            </X>
+            """;
+
+        string expected_output =
+            """
+            <X>
+              <A.B></A.B>
+              <A B="value">
+              </A>
+            </X>
+            """;
+
+        var output = XmlParserHelpers.GetValidXmlTree(input);
+
+        Assert.AreEqual(expected_output, output.ToFullString());
+    }
 }
