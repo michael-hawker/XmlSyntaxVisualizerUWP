@@ -124,6 +124,36 @@ public class DocumentTrimmingTests
     }
 
     [TestMethod]
+    public void ExtraneousUnclosedOpeningTagWithAttributeFull()
+    {
+        string input =
+            """
+            <X>
+              <X/>
+              <A.B></A.B>
+              <A B="value">
+              <A>&#x03C0;</A>
+              <A>a &lt;</A>
+            </X>
+            """;
+
+        string expected_output =
+            """
+            <X>
+              <X/>
+              <A.B></A.B>
+              <A>&#x03C0;</A>
+              <A>a &lt;</A>
+            </X>
+            """;
+
+        var output = XmlParserHelpers.GetValidXmlTree(input);
+
+        Assert.AreEqual(expected_output, output.ToFullString());
+    }
+
+
+    [TestMethod]
     public void ExtraneousUnclosedFullPropertyTag()
     {
         string input =

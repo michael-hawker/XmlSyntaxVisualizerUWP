@@ -181,15 +181,29 @@ public static class XmlDocumentSyntaxExtensions
     /// ancestor that is structurally safe to delete in one piece (an element, tag,
     /// attribute, text, comment, CDATA, PI, or declaration). Skips zero-width
     /// (synthesized "missing") ancestors so we always remove real source characters.
+    /// When the climb crossed any zero-width ancestor and lands on an
+    /// <see cref="XmlElementSyntax"/>, the element's <see cref="XmlElementSyntax.StartTag"/>
+    /// is returned instead of the whole element — the diagnostic was almost certainly a
+    /// missing end tag, so removing only the unclosed start tag preserves any valid
+    /// child content (it re-parents to the grandparent on the next parse).
     /// </summary>
     private static SyntaxNode FindEnclosingRemovable(SyntaxNode node)
     {
+        var skippedZeroWidth = false;
         for (var current = node; current != null; current = current.Parent)
         {
-            if (current.FullWidth == 0) continue;
+            if (current.FullWidth == 0)
+            {
+                skippedZeroWidth = true;
+                continue;
+            }
 
             switch (current)
             {
+                case XmlElementSyntax elem when skippedZeroWidth
+                        && elem.StartTag is XmlElementStartTagSyntax start
+                        && start.FullWidth > 0:
+                    return start;
                 case XmlElementSyntax _:
                 case XmlEmptyElementSyntax _:
                 case XmlElementStartTagSyntax _:
